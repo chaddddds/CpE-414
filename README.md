@@ -1,5 +1,9 @@
-# learning-git
+# BSCpE 4C
 
-Hello, World!
+Group members:
 
-This is a demo project for learning how to use Git.
+Garcia, Richard C.
+Tangi, Daniel E.
+Gorospe, Carlo Anton A.
+Liangco, Jofel R.
+Pangan, Kharlo P.
