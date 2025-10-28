@@ -2,8 +2,8 @@
 
 Group members:
 
-Garcia, Richard C.
-Tangi, Daniel E.
-Gorospe, Carlo Anton A.
-Liangco, Jofel R.
+Garcia, Richard C.\
+Tangi, Daniel E.\
+Gorospe, Carlo Anton A.\
+Liangco, Jofel R.\
 Pangan, Kharlo P.
