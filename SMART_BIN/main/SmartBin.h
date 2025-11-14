@@ -17,7 +17,19 @@ class GasSensor {
     int LED, Buzzer, Sensor;
     void printScreen(int value);
 };
+
 // IR COUNTER
+class IRCounter {
+  public:
+    IRCounter(int irPin, int buzzerPin, int buttonPin);
+    void setup();
+    void update();
+  private:
+    int IRPin, buzzerPin, buttonPin;
+    int count, oldValue;
+    void Count();
+    void Reset();
+};
 
 // PROXIMITY
 
@@ -36,4 +48,5 @@ class SmartBin {
 };
 
 #endif
+
 
