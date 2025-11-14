@@ -8,7 +8,15 @@
 extern LiquidCrystal_I2C lcd;
 
 // GAS SENSOR
-
+class GasSensor {
+  public:
+    GasSensor(int ledPin, int buzzerPin, int sensorPin);
+    void setup();
+    void update();
+  private:
+    int LED, Buzzer, Sensor;
+    void printScreen(int value);
+};
 // IR COUNTER
 
 // PROXIMITY
@@ -28,3 +36,4 @@ class SmartBin {
 };
 
 #endif
+
