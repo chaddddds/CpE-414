@@ -32,6 +32,17 @@ class IRCounter {
 };
 
 // PROXIMITY
+class ProximityLid {
+  public:
+    ProximityLid(int servoPin, int trigPin, int echoPin);
+    void setup();
+    void update();
+  private:
+    Servo myServo;
+    int servoPin, trigPin, echoPin;
+    int distance;
+    int getDistance();
+};
 
 class SmartBin {
   public:
@@ -48,5 +59,6 @@ class SmartBin {
 };
 
 #endif
+
 
 
