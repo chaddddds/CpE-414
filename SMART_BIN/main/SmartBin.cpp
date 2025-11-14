@@ -32,7 +32,54 @@ void GasSensor::printScreen(int value) {
   lcd.print(value);
   lcd.print("    ");
 }
+
 // IR COUNTER
+IRCounter::IRCounter(int irPin, int buzzerPin, int buttonPin)
+: IRPin(irPin), buzzerPin(buzzerPin), buttonPin(buttonPin) {
+  count = 0;
+  oldValue = 1;
+}
+
+void IRCounter::setup() {
+  pinMode(IRPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+}
+
+void IRCounter::update() {
+  lcd.setCursor(0, 1);
+  lcd.print("Cnt:");
+  lcd.print(count);
+  lcd.print("   ");
+
+  int irValue = digitalRead(IRPin);
+
+  if (irValue == 0 && oldValue == 1) {
+    oldValue = 0;
+    Count();
+  } else if (irValue == 1) {
+    oldValue = 1;
+  }
+
+  if (digitalRead(buttonPin) == 0) {
+    Reset();
+  }
+}
+
+void IRCounter::Count() {
+  count++;
+  digitalWrite(buzzerPin, HIGH);
+  delay(80);
+  digitalWrite(buzzerPin, LOW);
+
+  Serial.print("Object Count: ");
+  Serial.println(count);
+}
+
+void IRCounter::Reset() {
+  count = 0;
+  Serial.println("Counter reset");
+}
 
 // PROXIMITY 
 
@@ -68,4 +115,5 @@ void SmartBin::loop() {
 
   delay(150); 
 }
+
 
