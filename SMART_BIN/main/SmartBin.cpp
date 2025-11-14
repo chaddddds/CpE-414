@@ -82,6 +82,39 @@ void IRCounter::Reset() {
 }
 
 // PROXIMITY 
+ProximityLid::ProximityLid(int servoPin, int trigPin, int echoPin)
+: servoPin(servoPin), trigPin(trigPin), echoPin(echoPin) {}
+
+void ProximityLid::setup() {
+  myServo.attach(servoPin);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+int ProximityLid::getDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  return duration * 0.0343 / 2;
+}
+
+void ProximityLid::update() {
+  distance = getDistance();
+
+  lcd.setCursor(10, 1);
+  lcd.print(distance);
+  lcd.print("cm ");
+
+  if (distance <= 25) {
+    myServo.write(90);
+  } else {
+    myServo.write(0);
+  }
+}
 
 SmartBin::SmartBin(
   int gasLED, int gasBuzz, int gasAnalog,
@@ -115,5 +148,6 @@ void SmartBin::loop() {
 
   delay(150); 
 }
+
 
 
