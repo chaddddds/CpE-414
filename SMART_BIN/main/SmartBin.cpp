@@ -3,7 +3,35 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // GAS SENSOR
+GasSensor::GasSensor(int ledPin, int buzzerPin, int sensorPin)
+: LED(ledPin), Buzzer(buzzerPin), Sensor(sensorPin) {}
 
+void GasSensor::setup() {
+  pinMode(LED, OUTPUT);
+  pinMode(Buzzer, OUTPUT);
+}
+
+void GasSensor::update() {
+  int value = analogRead(Sensor);
+
+  printScreen(value);
+
+  if (value > 3500) {
+    digitalWrite(LED, HIGH);
+    digitalWrite(Buzzer, HIGH);
+    Serial.println("GAS ALERT!");
+  } else {
+    digitalWrite(LED, LOW);
+    digitalWrite(Buzzer, LOW);
+  }
+}
+
+void GasSensor::printScreen(int value) {
+  lcd.setCursor(0, 0);
+  lcd.print("Gas:");
+  lcd.print(value);
+  lcd.print("    ");
+}
 // IR COUNTER
 
 // PROXIMITY 
@@ -40,3 +68,4 @@ void SmartBin::loop() {
 
   delay(150); 
 }
+
