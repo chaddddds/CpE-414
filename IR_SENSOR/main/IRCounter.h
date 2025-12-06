@@ -1,24 +1,23 @@
-#ifndef IRCOUNTER_H
-#define IRCOUNTER_H
-
-#include <LiquidCrystal_I2C.h>
-
 class IRCounter {
-  public:
-    IRCounter(int irPin, int buzzerPin, int buttonPin);
-    void init();
+public:
+    IRCounter(int irPin, int buttonPin);
+
+    void setup();
     void update();
-    
-  private:
-    int IRPin;
-    int buzzerPin;
-    int buttonPin;
-    int n;
+
+    bool alert = false;
+    bool binFull = false;
+
+    unsigned long lastBeepTime;
+    unsigned long detectStart = 0;
+
+    int count = 0;
+
+    void resetAll();
+
+    int IRPin, buttonPin;
+
+private:
     int oldValue;
-    LiquidCrystal_I2C lcd;
-
     void Count();
-    void Reset();
 };
-
-#endif
