@@ -42,3 +42,18 @@ void GasSensor::printGasValue(int value) {
   Serial.print("Gas Value: ");
   Serial.println(value);
 }
+
+void GasSensor::update() {
+    value = analogRead(Sensor);
+    Serial.print("Gas Reading: ");
+    Serial.println(value);
+
+    if (value > 3500) {
+        digitalWrite(LED, HIGH);
+        alert = true;
+    } else {
+        digitalWrite(LED, LOW);
+        alert = false;
+    }
+}
+
