@@ -34,51 +34,67 @@ void GasSensor::printScreen(int value) {
 }
 
 // IR COUNTER
-IRCounter::IRCounter(int irPin, int buzzerPin, int buttonPin)
-: IRPin(irPin), buzzerPin(buzzerPin), buttonPin(buttonPin) {
-  count = 0;
-  oldValue = 1;
+IRCounter::IRCounter(int irPin, int buttonPin)
+    : IRPin(irPin), buttonPin(buttonPin) {
+    oldValue = 1;
+    lastBeepTime = 0;
 }
 
 void IRCounter::setup() {
-  pinMode(IRPin, INPUT);
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(buzzerPin, OUTPUT);
+    pinMode(IRPin, INPUT);
+    pinMode(buttonPin, INPUT_PULLUP);
 }
 
 void IRCounter::update() {
-  lcd.setCursor(0, 1);
-  lcd.print("Cnt:");
-  lcd.print(count);
-  lcd.print("   ");
+    int irValue = digitalRead(IRPin);
 
-  int irValue = digitalRead(IRPin);
+    if (irValue == 0 && oldValue == 1) {
+        oldValue = 0;
+        Count();
+        detectStart = millis();
+    } 
+    else if (irValue == 1 && oldValue == 0) {
+        oldValue = 1;
+        Serial.println("IR: No Object");
+        detectStart = 0;
+    }
 
-  if (irValue == 0 && oldValue == 1) {
-    oldValue = 0;
-    Count();
-  } else if (irValue == 1) {
-    oldValue = 1;
-  }
+    if (irValue == 0 && (millis() - detectStart >= 5000)) {
+        binFull = true;
+        Serial.println("BIN FULL DETECTED");
+    }
 
-  if (digitalRead(buttonPin) == 0) {
-    Reset();
-  }
+    if (digitalRead(buttonPin) == LOW) {
+        resetAll();
+    }
+
+    lcd.setCursor(0, 1);
+    if (binFull) {
+        lcd.print("FULL ");
+    } else {
+        lcd.print("Trash Count: ");
+        lcd.print(count);
+        lcd.print(" ");
+    }
 }
 
 void IRCounter::Count() {
-  count++;
-  digitalWrite(buzzerPin, HIGH);
-  delay(80);
-  digitalWrite(buzzerPin, LOW);
+    count++;
+    alert = true;
+    lastBeepTime = millis();
 
-  Serial.print("Object Count: ");
-  Serial.println(count);
+    Serial.println("IR: Object Detected");
+    Serial.print("Trash Count: ");
+    Serial.println(count);
 }
 
-void IRCounter::Reset() {
-  count = 0;
-  Serial.println("Counter reset");
+void IRCounter::resetAll() {
+    count = 0;
+    binFull = false;
+    alert = false;
+    detectStart = 0;
+
+    Serial.println("RESET -> Normal Mode");
 }
 
 // PROXIMITY 
@@ -148,6 +164,7 @@ void SmartBin::loop() {
 
   delay(150); 
 }
+
 
 
 
