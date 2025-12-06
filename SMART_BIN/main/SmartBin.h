@@ -20,15 +20,27 @@ class GasSensor {
 
 // IR COUNTER
 class IRCounter {
-  public:
-    IRCounter(int irPin, int buzzerPin, int buttonPin);
+public:
+    IRCounter(int irPin, int buttonPin);
+
     void setup();
     void update();
-  private:
-    int IRPin, buzzerPin, buttonPin;
-    int count, oldValue;
+
+    bool alert = false;
+    bool binFull = false;
+
+    unsigned long lastBeepTime;
+    unsigned long detectStart = 0;
+
+    int count = 0;
+
+    void resetAll();
+
+    int IRPin, buttonPin;
+
+private:
+    int oldValue;
     void Count();
-    void Reset();
 };
 
 // PROXIMITY
@@ -45,20 +57,42 @@ class ProximityLid {
 };
 
 class SmartBin {
-  public:
-    SmartBin(int gasLED, int gasBuzz, int gasAnalog,
-             int irPin, int irBuzz, int irButton,
-             int servoPin, int trigPin, int echoPin);
+public:
+    enum Mode { AUTO, MAINTENANCE, SLEEP };  
+
+    SmartBin(
+        int gasLED, int gasAnalog,
+        int irPin, int irButton,
+        int buzzerPin,
+        int servoPin, int trigPin, int echoPin
+    );
+
     void setup();
     void loop();
 
-  private:
+    void setMode(Mode m) { currentMode = m; }  
+    Mode getMode() { return currentMode; }     
+
+    int gasSensorValue = 0;
+    int distanceValue = 0;
+    String lidState = "CLOSED";
+
     GasSensor gasSensor;
     IRCounter irCounter;
     ProximityLid proxLid;
+
+    int buzzerPin;
+
+    LogEntry logs[100];  
+    int logIndex = 0;    
+    unsigned long lastLogTime = 0;  
+
+private:
+    Mode currentMode = AUTO;  
 };
 
 #endif
+
 
 
 
