@@ -132,6 +132,34 @@ void ProximityLid::update() {
   }
 }
 
+SmartBin::SmartBin(
+    int gasLED, int gasAnalog,
+    int irPin, int irButton,
+    int buzzerPin,
+    int servoPin, int trigPin, int echoPin
+)
+    : gasSensor(gasLED, gasAnalog),
+      irCounter(irPin, irButton),
+      proxLid(servoPin, trigPin, echoPin),
+      buzzerPin(buzzerPin) {}
+
+void SmartBin::setup() {
+    lcd.init();
+    lcd.backlight();
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print(" Smart Bin Ready ");
+    delay(1500);
+    lcd.clear();
+
+    pinMode(buzzerPin, OUTPUT);
+
+    gasSensor.setup();
+    irCounter.setup();
+    proxLid.setup();
+}
+
 void SmartBin::loop() {
     unsigned long currentMillis = millis();
 
