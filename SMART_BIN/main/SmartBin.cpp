@@ -132,37 +132,51 @@ void ProximityLid::update() {
   }
 }
 
-SmartBin::SmartBin(
-  int gasLED, int gasBuzz, int gasAnalog,
-  int irPin, int irBuzz, int irButton,
-  int servoPin, int trigPin, int echoPin
-)
-: gasSensor(gasLED, gasBuzz, gasAnalog),
-  irCounter(irPin, irBuzz, irButton),
-  proxLid(servoPin, trigPin, echoPin)
-{
-}
-
-void SmartBin::setup() {
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(" Smart Bin Ready ");
-  delay(1500);
-  lcd.clear();
-
-  gasSensor.setup();
-  irCounter.setup();
-  proxLid.setup();
-}
-
 void SmartBin::loop() {
-  gasSensor.update();
-  irCounter.update();
-  proxLid.update();
+    unsigned long currentMillis = millis();
 
-  delay(150); 
+    gasSensor.update();
+    irCounter.update();
+    proxLid.update(irCounter.binFull);
+
+    gasSensorValue = gasSensor.value;
+    distanceValue = proxLid.lastDistance;
+    lidState = proxLid.getState();
+
+    if (gasSensor.alert) {
+        proxLid.myServo.write(90);
+        lcd.setCursor(0, 0);
+        lcd.print("GAS ALERT!");
+
+        Serial.println("!!! GAS ALERT ACTIVE !!!");
+        digitalWrite(buzzerPin, HIGH);
+    }
+
+    else if (irCounter.alert) {
+        if (currentMillis - irCounter.lastBeepTime < 500) {
+            digitalWrite(buzzerPin, HIGH);
+        } else {
+            digitalWrite(buzzerPin, LOW);
+            irCounter.alert = false;
+        }
+    }
+
+    else {
+        digitalWrite(buzzerPin, LOW);
+    }
+
+    if (currentMode == AUTO && (currentMillis - lastLogTime >= 600000)) {  
+        logs[logIndex].timestamp = currentMillis;
+        logs[logIndex].gasValue = gasSensor.value;
+        logs[logIndex].count = irCounter.count;
+        logs[logIndex].distance = proxLid.lastDistance;
+        logs[logIndex].binFull = irCounter.binFull;
+
+        logIndex = (logIndex + 1) % 100;  
+        lastLogTime = currentMillis;
+
+        Serial.println("Log recorded.");
+    }
 }
 
 
