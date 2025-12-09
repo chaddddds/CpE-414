@@ -3,36 +3,26 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // GAS SENSOR
-GasSensor::GasSensor(int ledPin, int buzzerPin, int sensorPin)
-: LED(ledPin), Buzzer(buzzerPin), Sensor(sensorPin) {}
+GasSensor::GasSensor(int ledPin, int sensorPin)
+    : LED(ledPin), Sensor(sensorPin) {}
 
 void GasSensor::setup() {
-  pinMode(LED, OUTPUT);
-  pinMode(Buzzer, OUTPUT);
+    pinMode(LED, OUTPUT);
 }
 
 void GasSensor::update() {
-  int value = analogRead(Sensor);
+    value = analogRead(Sensor);
+    Serial.print("Gas Reading: ");
+    Serial.println(value);
 
-  printScreen(value);
-
-  if (value > 3500) {
-    digitalWrite(LED, HIGH);
-    digitalWrite(Buzzer, HIGH);
-    Serial.println("GAS ALERT!");
-  } else {
-    digitalWrite(LED, LOW);
-    digitalWrite(Buzzer, LOW);
-  }
+    if (value > 3500) {
+        digitalWrite(LED, HIGH);
+        alert = true;
+    } else {
+        digitalWrite(LED, LOW);
+        alert = false;
+    }
 }
-
-void GasSensor::printScreen(int value) {
-  lcd.setCursor(0, 0);
-  lcd.print("Gas:");
-  lcd.print(value);
-  lcd.print("    ");
-}
-
 // IR COUNTER
 IRCounter::IRCounter(int irPin, int buttonPin)
     : IRPin(irPin), buttonPin(buttonPin) {
@@ -99,37 +89,49 @@ void IRCounter::resetAll() {
 
 // PROXIMITY 
 ProximityLid::ProximityLid(int servoPin, int trigPin, int echoPin)
-: servoPin(servoPin), trigPin(trigPin), echoPin(echoPin) {}
+    : servoPin(servoPin), trigPin(trigPin), echoPin(echoPin) {}
 
 void ProximityLid::setup() {
-  myServo.attach(servoPin);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+    myServo.attach(servoPin);
+
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+
+    myServo.write(0);
 }
 
 int ProximityLid::getDistance() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
 
-  long duration = pulseIn(echoPin, HIGH);
-  return duration * 0.0343 / 2;
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    long duration = pulseIn(echoPin, HIGH, 25000);
+    return duration * 0.0343 / 2;
 }
 
-void ProximityLid::update() {
-  distance = getDistance();
+void ProximityLid::update(bool binFull) {
+    lastDistance = getDistance();
 
-  lcd.setCursor(10, 1);
-  lcd.print(distance);
-  lcd.print("cm ");
+    Serial.print("Distance: ");
+    Serial.print(lastDistance);
+    Serial.println(" cm");
 
-  if (distance <= 25) {
-    myServo.write(90);
-  } else {
-    myServo.write(0);
-  }
+    String state = (!binFull && lastDistance <= 25) ? "OPEN" : "CLOSED";  
+
+    if (state != lastState) {
+        if (state == "OPEN")
+            myServo.write(90);
+        else
+            myServo.write(0);
+
+        lcd.setCursor(0, 0);
+        lcd.print(state + " ");
+
+        lastState = state;
+    }
 }
 
 SmartBin::SmartBin(
@@ -206,6 +208,7 @@ void SmartBin::loop() {
         Serial.println("Log recorded.");
     }
 }
+
 
 
 
