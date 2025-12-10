@@ -61,4 +61,51 @@ private:
     String lastState = "CLOSED";
 };
 
+struct LogEntry {
+    unsigned long timestamp;
+    int gasValue;
+    int count;
+    int distance;
+    bool binFull;
+};
+
+class SmartBin {
+public:
+    enum Mode { AUTO, MAINTENANCE, SLEEP }; 
+
+    SmartBin(
+        int gasLED, int gasAnalog,
+        int irPin, int irButton,
+        int buzzerPin,
+        int servoPin, int trigPin, int echoPin
+    );
+
+    void setup();
+    void loop();
+
+    void setMode(Mode m);
+    Mode getMode() { return currentMode; }
+
+    int gasSensorValue = 0;
+    int distanceValue = 0;
+    String lidState = "CLOSED";
+
+    GasSensor gasSensor;
+    IRCounter irCounter;
+    ProximityLid proxLid;
+
+    int buzzerPin;
+
+    LogEntry logs[100];
+    int logIndex = 0;
+    unsigned long lastLogTime = 0;
+
+    void saveLogsToEEPROM();
+    void loadLogsFromEEPROM();
+    void clearEEPROM();  
+
+private:
+    Mode currentMode = AUTO;
+};
+
 #endif
