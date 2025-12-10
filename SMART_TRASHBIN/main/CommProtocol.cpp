@@ -101,6 +101,9 @@ void CommProtocol::handleClient(SmartBin &smartBin) {
     client.print(".card{border:1px solid #ccc;border-radius:10px;padding:15px;margin:10px;}");
     client.print(".mode-btn{background:#4CAF50;color:white;border:none;padding:10px;margin:5px;border-radius:5px;}");
     client.print(".control-btn{background:#2196F3;color:white;border:none;padding:10px;margin:5px;border-radius:5px;}");
+    client.print("table{border-collapse:collapse;width:100%;margin:10px 0;}");
+    client.print("th,td{border:1px solid #ddd;padding:8px;text-align:left;}");
+    client.print("th{background-color:#f2f2f2;}");
     client.print("</style>");
 
     if (smartBin.getMode() == SmartBin::AUTO) {
@@ -150,20 +153,22 @@ void CommProtocol::handleClient(SmartBin &smartBin) {
             client.print("<b style='color:green;'>All systems normal.</b>");
         client.print("</div>");
 
-        client.print("<div class='card'><h3>Recent Logs (Last 10)</h3>");
+        client.print("<div class='card'><h3>Sensor Logs</h3>");
+        client.print("<table>");
+        client.print("<tr><th>Timestamp (s)</th><th>Gas Value</th><th>Trash Count</th><th>Distance (cm)</th><th>Bin Full?</th></tr>");
         for (int i = 0; i < 10; i++) {
             int idx = (smartBin.logIndex - 1 - i + 100) % 100;
             if (smartBin.logs[idx].timestamp > 0) {
-                client.print(
-                    "Time: " + String(smartBin.logs[idx].timestamp / 1000) +
-                    "s, Gas: " + String(smartBin.logs[idx].gasValue) +
-                    ", Count: " + String(smartBin.logs[idx].count) +
-                    ", Dist: " + String(smartBin.logs[idx].distance) +
-                    ", Full: " + String(smartBin.logs[idx].binFull ? "Yes" : "No") + "<br>"
-                );
+                client.print("<tr>");
+                client.print("<td>" + String(smartBin.logs[idx].timestamp / 1000) + "</td>");
+                client.print("<td>" + String(smartBin.logs[idx].gasValue) + "</td>");
+                client.print("<td>" + String(smartBin.logs[idx].count) + "</td>");
+                client.print("<td>" + String(smartBin.logs[idx].distance) + "</td>");
+                client.print("<td>" + String(smartBin.logs[idx].binFull ? "Yes" : "No") + "</td>");
+                client.print("</tr>");
             }
         }
-        client.print("</div>");
+        client.print("</table></div>");
     } else if (smartBin.getMode() == SmartBin::MAINTENANCE) {
         client.print("<div class='card'><h3>Control Panel</h3>");
         client.print("<a href='/?cmd=openlid'><button class='control-btn'>Open Lid</button></a>");
